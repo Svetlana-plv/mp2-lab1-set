@@ -106,17 +106,32 @@ int TBitField::operator!=(const TBitField &bf) const // сравнение
 
 TBitField TBitField::operator|(const TBitField &bf) // операция "или"
 {
-    int maxlen = std::max(this->BitLen, bf.BitLen);
+    bool flag = 1;
+    int maxlen = this->BitLen;
+    int minlen = this->BitLen;
+    if (this->BitLen<bf.BitLen) maxlen = bf.BitLen;
+    else {
+        flag = 0;
+        minlen = bf.BitLen;
+    }
     TBitField res(maxlen);
-    for (int i = 0; i < res.MemLen; i++) res.pMem[i] = this->pMem[i] | bf.pMem[i];
+    for (int i = 0; i < minlen; i++) {
+        if (this->GetBit(i) || bf.GetBit(i)) res.SetBit(i);
+    }
+    for (int i = minlen; i < res.BitLen; i++) {
+        if (flag == 0 && this->GetBit(i)) res.SetBit(i);
+        else if (flag == 1 && bf.GetBit(i)) res.SetBit(i);
+    }
     return res;
 }
 
 TBitField TBitField::operator&(const TBitField &bf) // операция "и"
 {
     int maxlen = std::max(this->BitLen, bf.BitLen);
+    int minlen = std::min(this->BitLen, bf.BitLen);
     TBitField res(maxlen);
     for (int i = 0; i < res.MemLen; i++) res.pMem[i] = this->pMem[i] & bf.pMem[i];
+    for (int i = minlen; i < res.BitLen; i++) res.ClrBit(i);
     return res;
 }
 
